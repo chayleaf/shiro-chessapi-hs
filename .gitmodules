@@ -1,0 +1,3 @@
+[submodule "2025-chess-bot-tournament"]
+	path = 2025-chess-bot-tournament
+	url = https://github.com/shiro-nya/2025-chess-bot-tournament.git

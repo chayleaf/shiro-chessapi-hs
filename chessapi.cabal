@@ -1,0 +1,36 @@
+cabal-version:       2.2
+
+name:                chessapi
+version:             0.1.0.0
+homepage:            https://github.com/chayleaf/shiro-chessapi-hs#readme
+license:             BSD-3-Clause
+license-file:        LICENSE
+author:              chayleaf
+build-type:          Simple
+extra-source-files:  README.md
+                     c/compat.c
+                     2025-chess-bot-tournament/src/c/bitboard.c
+                     2025-chess-bot-tournament/src/c/chessapi.c
+                     2025-chess-bot-tournament/src/c/bitboard.h
+                     2025-chess-bot-tournament/src/c/chessapi.h
+
+library
+  hs-source-dirs:      src
+  c-sources:           c/compat.c 2025-chess-bot-tournament/src/c/bitboard.c 2025-chess-bot-tournament/src/c/chessapi.c
+  cc-options:          -O3 --std=c23
+  exposed-modules:     Chess
+  other-modules:       Chess.Bindings
+  build-depends:       base >= 4.7 && < 5
+  default-language:    GHC2024
+  ghc-options:         -Wall
+                       -Wcompat
+                       -Widentities
+                       -Wincomplete-record-updates
+                       -Wincomplete-uni-patterns
+                       -Wmissing-home-modules
+                       -Wpartial-fields
+                       -Wredundant-constraints
+
+source-repository head
+  type:     git
+  location: https://github.com/chayleaf/shiro-chessapi-hs
