@@ -82,6 +82,7 @@ moveDefault :: Move
 -- | Get the game's current board. The current board changes after every
 --   move.
 getBoard :: IO Board
+opponentMove :: IO Move
 
 -- | Submit a move that you are going to play.
 submitMove :: Move -> IO ()
@@ -142,6 +143,15 @@ pushMove :: Move -> Board -> Board
 
 -- | Undo a move on a board, returning a board without that move.
 popMove :: Board -> Board
+
+-- | Read the full move counter (starts at 1, increments each time black
+--   moves)
+fullMoves :: Board -> Int
+
+-- | Read the half move counter (starts at 0, increments after every move,
+--   resets to 0 after pawn moves or captures). Used for the 50-move draw
+--   rule.
+halfMoves :: Board -> Int
 
 -- | Get a bitboard for a particular player and piece. The bitboard's bits
 --   will indicate the presence of that particular piece of that particular
