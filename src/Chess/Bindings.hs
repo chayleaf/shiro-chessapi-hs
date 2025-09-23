@@ -132,6 +132,14 @@ foreign import ccall unsafe "chess_get_bitboard"
   c'chess_get_bitboard ::
     Ptr C'Board -> C'PlayerColor -> C'PieceType -> IO CULong
 
+foreign import ccall unsafe "chess_get_full_moves"
+  c'chess_get_full_moves ::
+    Ptr C'Board -> IO CInt
+
+foreign import ccall unsafe "chess_get_half_moves"
+  c'chess_get_half_moves ::
+    Ptr C'Board -> IO CInt
+
 foreign import ccall unsafe "chess_push_unrolled"
   c'chess_push_unrolled ::
     CULong -> CULong -> CUChar -> CBool -> CBool -> IO ()
@@ -175,6 +183,10 @@ foreign import ccall unsafe "chess_get_index_from_bitboard"
 foreign import ccall unsafe "chess_get_bitboard_from_index"
   c'chess_get_bitboard_from_index ::
     CInt -> IO Word64
+
+foreign import ccall unsafe "chess_get_opponent_move_ptr"
+  c'chess_get_opponent_move_ptr ::
+    IO (Ptr C'Move)
 
 foreign import ccall unsafe "chess_free_moves_array"
   c'chess_free_moves_array ::

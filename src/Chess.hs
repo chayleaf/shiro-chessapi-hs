@@ -11,6 +11,7 @@ module Chess
     -- * IO actions
     -- | For info on how to use IO actions, see [Haskell wiki](https://wiki.haskell.org/index.php?title=Introduction_to_Haskell_IO/Introduction_to_IO_actions).
     getBoard,
+    opponentMove,
     submitMove,
     getTimeMillis,
     getOpponentTimeMillis,
@@ -30,6 +31,8 @@ module Chess
     zobristKey,
     pushMove,
     popMove,
+    fullMoves,
+    halfMoves,
     bitboard,
     pieceFromIndex,
     pieceFromBitboard,
@@ -181,6 +184,9 @@ unsafeBoard action (Board board) = unsafePerformIO $ withForeignPtr board action
 getBoard :: IO Board
 getBoard = Board <$> (c'chess_get_board >>= newForeignPtr p'chess_free_board)
 
+opponentMove :: IO Move
+opponentMove = moveFromC <$> (c'chess_get_opponent_move_ptr >>= peek)
+
 -- | Submit a move that you are going to play.
 submitMove :: Move -> IO ()
 submitMove move = do
@@ -281,6 +287,15 @@ popMove = unsafeBoard $ \board -> do
   b <- c'chess_clone_board board
   c'chess_undo_move b
   Board <$> newForeignPtr p'chess_free_board b
+
+-- | Read the full move counter (starts at 1, increments each time black moves)
+fullMoves :: Board -> Int
+fullMoves = unsafeBoard $ fmap fromIntegral . c'chess_get_full_moves
+
+-- | Read the half move counter (starts at 0, increments after every move, resets to 0 after pawn moves or captures).
+-- Used for the 50-move draw rule.
+halfMoves :: Board -> Int
+halfMoves = unsafeBoard $ fmap fromIntegral . c'chess_get_half_moves
 
 -- | Get a bitboard for a particular player and piece. The bitboard's bits will indicate the presence
 -- of that particular piece of that particular color on each square of the board.
