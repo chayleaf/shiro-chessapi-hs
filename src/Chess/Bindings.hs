@@ -150,15 +150,15 @@ foreign import ccall unsafe "chess_done"
 
 foreign import ccall unsafe "chess_get_time_millis"
   c'chess_get_time_millis ::
-    IO CLong
+    IO Word64
 
 foreign import ccall unsafe "chess_get_opponent_time_millis"
   c'chess_get_opponent_time_millis ::
-    IO CLong
+    IO Word64
 
 foreign import ccall unsafe "chess_get_elapsed_time_millis"
   c'chess_get_elapsed_time_millis ::
-    IO CLong
+    IO Word64
 
 foreign import ccall unsafe "chess_get_piece_from_index"
   c'chess_get_piece_from_index ::
