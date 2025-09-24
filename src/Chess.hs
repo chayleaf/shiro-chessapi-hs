@@ -8,7 +8,9 @@ module Chess
     State (..),
     Move (..),
     moveDefault,
+
     -- * IO actions
+
     -- | For info on how to use IO actions, see [Haskell wiki](https://wiki.haskell.org/index.php?title=Introduction_to_Haskell_IO/Introduction_to_IO_actions).
     getBoard,
     opponentMove,
@@ -16,6 +18,7 @@ module Chess
     getTimeMillis,
     getOpponentTimeMillis,
     getElapsedTimeMillis,
+
     -- * Board functions
     legalMoves,
     nextTurnColor,
@@ -38,6 +41,7 @@ module Chess
     pieceFromBitboard,
     colorFromIndex,
     colorFromBitboard,
+
     -- * Bitboard functions
     indexFromBitboard,
     bitboardFromIndex,
@@ -45,7 +49,9 @@ module Chess
     bbSlide,
     bbFlood,
     bbBlocker,
+
     -- ** Bitboard function specializations
+
     -- | Specializations for individual directions, matching the C API.
     bbSlideN,
     bbSlideS,
@@ -176,7 +182,7 @@ moveFromC move =
       castle = toBool $ c'Move'castle move
     }
 
--- Perform unsafe IO on a Board
+-- Perform unsafe IO on a Board. To ensure safety, the Haskell API must clone boards before mutation.
 unsafeBoard :: (Ptr C'Board -> IO a) -> Board -> a
 unsafeBoard action (Board board) = unsafePerformIO $ withForeignPtr board action
 
@@ -184,6 +190,7 @@ unsafeBoard action (Board board) = unsafePerformIO $ withForeignPtr board action
 getBoard :: IO Board
 getBoard = Board <$> (c'chess_get_board >>= newForeignPtr p'chess_free_board)
 
+-- | Get the opponent's latest move. Will equal to 'moveDefault' if this is the first move.
 opponentMove :: IO Move
 opponentMove = moveFromC <$> (c'chess_get_opponent_move_ptr >>= peek)
 
@@ -292,7 +299,7 @@ popMove = unsafeBoard $ \board -> do
 fullMoves :: Board -> Int
 fullMoves = unsafeBoard $ fmap fromIntegral . c'chess_get_full_moves
 
--- | Read the half move counter (starts at 0, increments after every move, resets to 0 after pawn moves or captures).
+-- | Read the half move counter (starts at 0, increments after every move, resets to 0 after captures and pawn moves).
 -- Used for the 50-move draw rule.
 halfMoves :: Board -> Int
 halfMoves = unsafeBoard $ fmap fromIntegral . c'chess_get_half_moves
@@ -364,7 +371,8 @@ bbFlood ::
   -- | The board with movement squares marked. The original square will not be marked.
   Bitboard
 bbFlood captures dir empty board =
-  (if captures then bbSlide dir else (.&. empty)) $ foldl (.|.) board (map ((.&. empty) . bbSlide dir) [0 .. 6])
+  (if captures then bbSlide dir else (.&. empty)) $
+    foldr (\_ gen -> gen .|. (bbSlide dir gen .&. empty)) board [0 :: Int .. 6]
 
 -- | Travel in a particular direction until encountering a nonempty space.
 bbBlocker ::
@@ -376,12 +384,15 @@ bbBlocker ::
   Bitboard ->
   -- | The board after a shift encountered a nonempty space.
   Bitboard
-bbBlocker dir empty =
-  run 7
-  where
-    run :: Int -> Bitboard -> Bitboard
-    run 0 x = x
-    run n x = let y = bbSlide dir x in if y .&. empty == 0 then y else run (pred n) x
+bbBlocker dir empty board =
+  foldr
+    ( \_ gen ->
+        if gen .&. empty == 0
+          then gen
+          else bbSlide dir gen
+    )
+    (bbSlide dir board)
+    [0 :: Int .. 5]
 
 bbSlideN :: Bitboard -> Bitboard
 bbSlideN = bbSlide N
