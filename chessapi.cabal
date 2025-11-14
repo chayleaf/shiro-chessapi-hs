@@ -30,6 +30,7 @@ library
                        -Wmissing-home-modules
                        -Wpartial-fields
                        -Wredundant-constraints
+                       -O2
 
 source-repository head
   type:     git
